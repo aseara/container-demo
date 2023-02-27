@@ -39,7 +39,7 @@ func child() {
 	fmt.Printf("Running %v as %d\n", os.Args[2:], os.Getpid())
 
 	must(syscall.Sethostname([]byte("container")))
-	must(syscall.Chroot("/home/aseara/rootfs/busybox"))
+	must(syscall.Chroot("/home/aseara/rootfs/ubuntu"))
 	must(syscall.Chdir("/"))
 	must(syscall.Mount("proc", "proc", "proc", 0, ""))
 
