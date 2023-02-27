@@ -1,4 +1,4 @@
-// main container test 1
+// main container demo run a normal process
 package main
 
 import (

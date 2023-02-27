@@ -1,4 +1,4 @@
-// main change hostname in container
+// main container demo with ps
 package main
 
 import (
@@ -20,7 +20,7 @@ func main() {
 }
 
 func run() {
-	fmt.Printf("Running %v\n", os.Args[2:])
+	fmt.Printf("Running %v as %d\n", os.Args[2:], os.Getegid())
 
 	cmd := exec.Command("/proc/self/exe", append([]string{"child"}, os.Args[2:]...)...)
 	cmd.Stdin = os.Stdin
@@ -28,26 +28,28 @@ func run() {
 	cmd.Stderr = os.Stderr
 
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWUTS,
+		Cloneflags:   syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
+		Unshareflags: syscall.CLONE_NEWNS,
 	}
 
-	err := cmd.Run()
-	must(err)
+	must(cmd.Run())
+
+	must(syscall.Unmount("/proc", 0))
 }
 
 func child() {
-	fmt.Printf("Running %v\n", os.Args[2:])
+	fmt.Printf("Running %v as %d\n", os.Args[2:], os.Getegid())
 
-	err := syscall.Sethostname([]byte("container"))
-	must(err)
+	must(syscall.Sethostname([]byte("container")))
+	must(syscall.Chdir("/"))
+	must(syscall.Mount("proc", "proc", "proc", 0, ""))
 
 	cmd := exec.Command(os.Args[2], os.Args[3:]...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	err = cmd.Run()
-	must(err)
+	must(cmd.Run())
 }
 
 func must(err error) {

@@ -1,4 +1,4 @@
-// main container 2
+// main container demo can change hostname
 package main
 
 import (
