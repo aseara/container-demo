@@ -31,16 +31,16 @@ func run() {
 		Unshareflags: syscall.CLONE_NEWNS,
 	}
 
-	cmd.Run()
+	must(cmd.Run())
 }
 
 func child() {
 	fmt.Printf("Running %v as %d\n", os.Args[2:], os.Getpid())
 
-	syscall.Sethostname([]byte("container"))
-	syscall.Chroot("/home/aseara/code/container-demo/rootfs/ubuntu")
-	syscall.Chdir("/")
-	syscall.Mount("proc", "proc", "proc", 0, "")
+	must(syscall.Sethostname([]byte("container")))
+	must(syscall.Chroot("/home/aseara/rootfs/busybox"))
+	must(syscall.Chdir("/"))
+	must(syscall.Mount("proc", "proc", "proc", 0, ""))
 
 	cmd := exec.Command(os.Args[2], os.Args[3:]...)
 	cmd.Stdin = os.Stdin
@@ -51,7 +51,13 @@ func child() {
 		Cloneflags: syscall.CLONE_NEWUTS,
 	}
 
-	cmd.Run()
+	must(cmd.Run())
 
-	syscall.Unmount("/proc", 0)
+	must(syscall.Unmount("/proc", 0))
+}
+
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
