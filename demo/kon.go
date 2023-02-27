@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 	"syscall"
 )
 
@@ -32,7 +34,9 @@ func run() {
 		Unshareflags: syscall.CLONE_NEWNS,
 	}
 
+	cg()
 	must(cmd.Run())
+	exe("cgdelete -r -g cpu,memory,pids:aseara")
 }
 
 func child() {
@@ -53,8 +57,25 @@ func child() {
 	}
 
 	must(cmd.Run())
-
 	must(syscall.Unmount("/proc", 0))
+}
+
+func cg() {
+	exe("cgcreate -g cpu,memory,pids:aseara")
+	exe("cgset -r pids.max=20 aseara")
+	exe("cgset -r memory.limit_in_bytes=10000000 aseara")
+	exe("cgset -r cpu.cfs_period_us=100000 aseara")
+	exe("cgset -r cpu.cfs_quota_us=20000 aseara")
+	exe("cgclassify -g cpu,memory,pids:aseara " + strconv.Itoa(os.Getpid()))
+}
+
+func exe(command string) {
+	args := strings.Split(command, " ")
+	cmd := exec.Command(args[0], args[1:]...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	must(cmd.Run())
 }
 
 func must(err error) {
