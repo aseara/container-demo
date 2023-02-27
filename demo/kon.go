@@ -36,7 +36,7 @@ func run() {
 
 	cg()
 	must(cmd.Run())
-	exe("cgdelete -r -g cpu,memory,pids:aseara")
+	exec1("cgdelete -r -g cpu,memory,pids:aseara")
 }
 
 func child() {
@@ -47,26 +47,26 @@ func child() {
 	must(syscall.Chdir("/"))
 	must(syscall.Mount("proc", "proc", "proc", 0, ""))
 
-	cmd := exec.Command(os.Args[2], os.Args[3:]...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	exec2(os.Args[2:]...)
 
-	must(cmd.Run())
 	must(syscall.Unmount("/proc", 0))
 }
 
 func cg() {
-	exe("cgcreate -g cpu,memory,pids:aseara")
-	exe("cgset -r pids.max=20 aseara")
-	exe("cgset -r memory.limit_in_bytes=10000000 aseara")
-	exe("cgset -r cpu.cfs_period_us=100000 aseara")
-	exe("cgset -r cpu.cfs_quota_us=20000 aseara")
-	exe("cgclassify -g cpu,memory,pids:aseara " + strconv.Itoa(os.Getpid()))
+	exec1("cgcreate -g cpu,memory,pids:aseara")
+	exec1("cgset -r pids.max=20 aseara")
+	exec1("cgset -r memory.limit_in_bytes=10000000 aseara")
+	exec1("cgset -r cpu.cfs_period_us=100000 aseara")
+	exec1("cgset -r cpu.cfs_quota_us=20000 aseara")
+	exec1("cgclassify -g cpu,memory,pids:aseara " + strconv.Itoa(os.Getpid()))
 }
 
-func exe(command string) {
+func exec1(command string) {
 	args := strings.Split(command, " ")
+	exec2(args...)
+}
+
+func exec2(args ...string) {
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
