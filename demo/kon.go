@@ -52,10 +52,6 @@ func child() {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWUTS,
-	}
-
 	must(cmd.Run())
 	must(syscall.Unmount("/proc", 0))
 }
