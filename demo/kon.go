@@ -48,7 +48,6 @@ func child() {
 	must(syscall.Mount("proc", "proc", "proc", 0, ""))
 
 	exec2(os.Args[2:]...)
-
 	must(syscall.Unmount("/proc", 0))
 }
 

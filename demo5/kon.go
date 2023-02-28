@@ -33,8 +33,6 @@ func run() {
 	}
 
 	must(cmd.Run())
-
-	must(syscall.Unmount("/proc", 0))
 }
 
 func child() {
@@ -50,6 +48,7 @@ func child() {
 	cmd.Stderr = os.Stderr
 
 	must(cmd.Run())
+	must(syscall.Unmount("/proc", 0))
 }
 
 func must(err error) {

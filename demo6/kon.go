@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 	"syscall"
 )
 
@@ -34,7 +33,6 @@ func run() {
 	}
 
 	must(cmd.Run())
-	exec1("cgdelete -r -g cpu,memory,pids:aseara")
 }
 
 func child() {
@@ -48,11 +46,6 @@ func child() {
 	exec2(os.Args[2:]...)
 
 	must(syscall.Unmount("/proc", 0))
-}
-
-func exec1(command string) {
-	args := strings.Split(command, " ")
-	exec2(args...)
 }
 
 func exec2(args ...string) {
